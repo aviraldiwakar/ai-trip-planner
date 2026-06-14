@@ -1,0 +1,8 @@
+{
+  "name": "Collaborative Trip Planner",
+  "description": "A real-time data-driven system for collaborative trip planning, featuring consensus overlap calculations, priority scoring, and Python-driven AI similarity recommendations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

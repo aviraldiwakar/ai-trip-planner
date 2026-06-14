@@ -1,0 +1,22 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+# IntelliJ IDE files
+.idea/
+*.iml
+out/
+
+# Maven build folders
+target/
+
+# Node modules (for your frontend)
+node_modules/
+dist/
+
+# Environment Variables
+.env
