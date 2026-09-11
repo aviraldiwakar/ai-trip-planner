@@ -3,6 +3,8 @@ package com.collaborative.planner.model;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "generated_trips")
@@ -26,6 +28,7 @@ public class GeneratedTrip {
     private LocalDate endDate;
 
     // We store JSON string in PostgreSQL JSONB column
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "ai_suggestions", nullable = false, columnDefinition = "jsonb")
     private String aiSuggestions;
 
@@ -41,6 +44,7 @@ public class GeneratedTrip {
         this.startDate = startDate;
         this.endDate = endDate;
         this.aiSuggestions = aiSuggestions;
+
     }
 
     // Getters and Setters

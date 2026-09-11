@@ -7,5 +7,8 @@ import java.util.List;
 
 @Repository
 public interface DestinationPreferenceRepository extends JpaRepository<DestinationPreference, Integer> {
+
     List<DestinationPreference> findByGroupId(Integer groupId);
+
+    long countByGroupId(Integer groupId);
 }

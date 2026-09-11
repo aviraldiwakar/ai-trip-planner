@@ -3,6 +3,7 @@ package com.collaborative.planner.controller;
 import com.collaborative.planner.model.DestinationPreference;
 import com.collaborative.planner.repository.DestinationPreferenceRepository;
 import com.collaborative.planner.repository.GroupMemberRepository;
+import com.collaborative.planner.service.TripGenerationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,10 @@ public class PreferenceController {
     @Autowired
     private GroupMemberRepository groupMemberRepository;
 
+    // Inject the service that contains your AI generation logic
+    @Autowired
+    private TripGenerationService tripGenerationService;
+
     public static class PreferenceSubmitRequest {
         private Integer groupId;
         private Integer userId;
@@ -33,7 +38,6 @@ public class PreferenceController {
         public Integer getGroupId() { return groupId; }
         public void setGroupId(Integer groupId) { this.groupId = groupId; }
         public Integer getUserId() { return userId; }
-        public void setUserId(Integer userId) { this.userId = userId; }
         public String getDestinationName() { return destinationName; }
         public void setDestinationName(String destinationName) { this.destinationName = destinationName; }
         public LocalDate getFromDate() { return fromDate; }
@@ -46,9 +50,9 @@ public class PreferenceController {
 
     @PostMapping("/submit")
     public ResponseEntity<?> submitPreference(@RequestBody PreferenceSubmitRequest req) {
-        if (req.getGroupId() == null || req.getUserId() == null || 
-            req.getDestinationName() == null || req.getDestinationName().trim().isEmpty() ||
-            req.getFromDate() == null || req.getToDate() == null || req.getPriorityScore() == null) {
+        if (req.getGroupId() == null || req.getUserId() == null ||
+                req.getDestinationName() == null || req.getDestinationName().trim().isEmpty() ||
+                req.getFromDate() == null || req.getToDate() == null || req.getPriorityScore() == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "All preference fields are required."));
         }
 
@@ -60,7 +64,6 @@ public class PreferenceController {
             return ResponseEntity.badRequest().body(Map.of("message", "The Start Date ('from') cannot fall after End Date ('to')."));
         }
 
-        // Validate group membership before allowing vote
         boolean isMember = groupMemberRepository.existsByUserIdAndGroupId(req.getUserId(), req.getGroupId());
         if (!isMember) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -77,7 +80,16 @@ public class PreferenceController {
                 req.getPriorityScore()
         );
 
+        // 1. Save the newly submitted preference
         DestinationPreference saved = preferenceRepository.save(preference);
+
+        // 2. Count total preferences submitted for this group so far
+        long currentSubmissions = preferenceRepository.countByGroupId(req.getGroupId());
+
+        // Count the total number of members in this specific group
+        long totalGroupSize = groupMemberRepository.countByGroupId(req.getGroupId());
+
+        // 4. Return the response to the user AFTER the logic executes
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "message", "Destination preference saved successfully",
                 "pref_id", saved.getPrefId()
