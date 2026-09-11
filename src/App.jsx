@@ -3,12 +3,12 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './Login';
 import Dashboard from './Dashboard';
 import TripRoom from './TripRoom';
+import Navbar from './Navbar';
 // We will build these two components next:
 // import Dashboard from './Dashboard';
 // import TripRoom from './TripRoom';
 
 export default function App() {
-    // This state will hold the user's ID globally after they log in
     const [userId, setUserId] = useState(() => {
         const saved = localStorage.getItem('tripPlannerUserId');
         return saved ? parseInt(saved, 10) : null;
@@ -16,6 +16,7 @@ export default function App() {
 
     return (
         <BrowserRouter>
+            <Navbar setUserId={setUserId} />
             <Routes>
                 <Route path="/" element={<Login setUserId={setUserId} />} />
 
