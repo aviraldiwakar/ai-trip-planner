@@ -1,15 +1,38 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import './index.css';
 
 export default function TripRoom({ userId, setAppPhase }) {
     const { groupId } = useParams();
+    const navigate = useNavigate(); // Hook added to handle the redirection
     const [destination, setDestination] = useState('');
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
     const [priorityScore, setPriorityScore] = useState(3);
     const [submittedDestinations, setSubmittedDestinations] = useState([]);
     const [statusMessage, setStatusMessage] = useState('');
+
+    // AI Loading States
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [msgIndex, setMsgIndex] = useState(0);
+
+    const messages = [
+        "Syncing group travel dates...",
+        "Analyzing destination preferences...",
+        "Cross-referencing global flight paths...",
+        "Crafting your customized itinerary...",
+        "Packing the virtual bags..."
+    ];
+
+    useEffect(() => {
+        let interval;
+        if (isGenerating) {
+            interval = setInterval(() => {
+                setMsgIndex((prev) => (prev + 1) % messages.length);
+            }, 3500);
+        }
+        return () => clearInterval(interval);
+    }, [isGenerating, messages.length]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -48,24 +71,83 @@ export default function TripRoom({ userId, setAppPhase }) {
             setSubmittedDestinations([...submittedDestinations, destination.trim()]);
             setDestination('');
             setStatusMessage('Preference saved successfully!');
+            fetchGroupPreferences();
+
         } catch (err) {
             setStatusMessage('Failed to connect to the backend server.');
         }
     };
 
+    // The finalized live integration function
     const handleFinalizeTrip = async () => {
+        setIsGenerating(true);
         setAppPhase('generating');
 
         try {
-            // Future Python AI microservice call goes here
-            setTimeout(() => {
-                setAppPhase('ready');
-            }, 6000);
+            // 1. Send generation request to Spring Boot
+            const response = await fetch('http://localhost:8080/api/trips/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ groupId: parseInt(groupId) })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to generate trip");
+            }
+
+            // 2. Parse the JSON string received from Python via Java
+            const aiData = typeof data.aiSuggestions === 'string'
+                ? JSON.parse(data.aiSuggestions)
+                : data.aiSuggestions;
+
+            // 3. Shape the payload perfectly for the TripResult page
+            const finalPayload = {
+                topDestination: data.winningDestination,
+                commonDates: {
+                    hasOverlap: data.dateOverlapValid,
+                    startDate: data.commonStartDate,
+                    endDate: data.commonEndDate
+                },
+                bestMonths: aiData.bestMonths || [],
+                datesAligned: aiData.datesAligned,
+                mustVisitPlaces: aiData.mustVisitPlaces || [],
+                seasonalAdvice: aiData.seasonalAdvice || "",
+                alternativeSuggestions: aiData.alternativeSuggestions || []
+            };
+
+            // 4. Save to session and redirect
+            sessionStorage.setItem(`trip_result_${groupId}`, JSON.stringify(finalPayload));
+
+            setAppPhase('ready'); // Stop the cinematic video
+            navigate(`/room/${groupId}/itinerary`); // Redirect to results
+
         } catch (error) {
             console.error("AI Generation failed", error);
+            setStatusMessage(`Error: ${error.message}`);
+            setIsGenerating(false);
             setAppPhase('ready');
         }
     };
+
+    const [groupPreferences, setGroupPreferences] = useState([]);
+
+    const fetchGroupPreferences = async () => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/preferences/group/${groupId}`);
+            if (response.ok) {
+                const data = await response.json();
+                setGroupPreferences(data);
+            }
+        } catch (err) {
+            console.error("Failed to load group preferences:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchGroupPreferences();
+    }, [groupId]);
 
     return (
         <div style={{ maxWidth: '900px', margin: '40px auto', padding: '0 20px', position: 'relative', zIndex: 1 }}>
@@ -78,54 +160,29 @@ export default function TripRoom({ userId, setAppPhase }) {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '30px' }}>
 
-                {/* Preference Form using Glass Card */}
+                {/* Preference Form */}
                 <div className="glass-card">
-                    <h3 style={{ marginTop: 0, color: '#1f2937' }}>Add a Destination</h3>
+                    <h3 style={{ marginTop: 0, color: '#f3f4f6' }}>Add a Destination</h3>
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', color: '#374151' }}>Destination Name</label>
-                            <input
-                                type="text"
-                                value={destination}
-                                onChange={(e) => setDestination(e.target.value)}
-                                required
-                                className="input-field"
-                            />
+                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', color: '#f3f4f6' }}>Destination Name</label>
+                            <input type="text" value={destination} onChange={(e) => setDestination(e.target.value)} required className="input-field" disabled={isGenerating} />
                         </div>
                         <div style={{ display: 'flex', gap: '10px' }}>
                             <div style={{ flex: 1 }}>
-                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', color: '#374151' }}>Start Date</label>
-                                <input
-                                    type="date"
-                                    value={fromDate}
-                                    onChange={(e) => setFromDate(e.target.value)}
-                                    required
-                                    className="input-field"
-                                />
+                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', color: '#f3f4f6' }}>Start Date</label>
+                                <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} required className="input-field" disabled={isGenerating} />
                             </div>
                             <div style={{ flex: 1 }}>
-                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', color: '#374151' }}>End Date</label>
-                                <input
-                                    type="date"
-                                    value={toDate}
-                                    onChange={(e) => setToDate(e.target.value)}
-                                    required
-                                    className="input-field"
-                                />
+                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', color: '#f3f4f6' }}>End Date</label>
+                                <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} required className="input-field" disabled={isGenerating} />
                             </div>
                         </div>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', color: '#374151' }}>Priority Score (1-5)</label>
-                            <input
-                                type="number"
-                                min="1" max="5"
-                                value={priorityScore}
-                                onChange={(e) => setPriorityScore(e.target.value)}
-                                required
-                                className="input-field"
-                            />
+                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', color: '#f3f4f6' }}>Priority Score (1-5)</label>
+                            <input type="number" min="1" max="5" value={priorityScore} onChange={(e) => setPriorityScore(e.target.value)} required className="input-field" disabled={isGenerating} />
                         </div>
-                        <button type="submit" className="btn btn-primary" style={{ marginTop: '10px' }}>
+                        <button type="submit" className="btn btn-primary" style={{ marginTop: '10px' }} disabled={isGenerating}>
                             Submit Preference
                         </button>
                         {statusMessage && (
@@ -137,8 +194,8 @@ export default function TripRoom({ userId, setAppPhase }) {
 
                     {submittedDestinations.length > 0 && (
                         <div style={{ marginTop: '20px', borderTop: '1px solid rgba(0,0,0,0.1)', paddingTop: '15px' }}>
-                            <h4 style={{ margin: '0 0 10px 0', color: '#1f2937' }}>Your Added Destinations:</h4>
-                            <ul style={{ margin: 0, paddingLeft: '20px', color: '#4b5563' }}>
+                            <h4 style={{ margin: '0 0 10px 0', color: '#f3f4f6' }}>Your Added Destinations:</h4>
+                            <ul style={{ margin: 0, paddingLeft: '20px', color: '#f3f4f6' }}>
                                 {submittedDestinations.map((dest, idx) => (
                                     <li key={idx} style={{ marginBottom: '5px' }}>{dest}</li>
                                 ))}
@@ -147,18 +204,77 @@ export default function TripRoom({ userId, setAppPhase }) {
                     )}
                 </div>
 
-                {/* AI Generator Component replaced with direct UI */}
-                <div className="glass-card" style={{ alignSelf: 'start' }}>
-                    <h3 style={{ marginTop: 0, color: '#1f2937' }}>Ready to generate?</h3>
-                    <p style={{ color: '#4b5563', lineHeight: '1.5', marginBottom: '24px' }}>
-                        Once everyone has submitted their preferences, click below to lock in the dates and get AI recommendations.
-                    </p>
-                    <button onClick={handleFinalizeTrip} className="btn btn-success">
-                        Finalize Group Trip
-                    </button>
+                {/* AI Generator Component / Loading State */}
+                <div className="glass-card" style={{ alignSelf: 'start', textAlign: isGenerating ? 'center' : 'left' }}>
+                    {!isGenerating ? (
+                        <>
+                            <h3 style={{ marginTop: 0, color: '#f3f4f6' }}>Ready to generate?</h3>
+                            <p style={{ color: '#f3f4f6', lineHeight: '1.5', marginBottom: '24px' }}>
+                                Once everyone has submitted their preferences, click below to lock in the dates and get AI recommendations.
+                            </p>
+                            <button onClick={handleFinalizeTrip} className="btn btn-success">
+                                Finalize Group Trip
+                            </button>
+                        </>
+                    ) : (
+                        <div style={{ padding: '20px 0' }}>
+                            <h3 style={{ marginTop: 0, color: '#f3f4f6', marginBottom: '16px' }}>AI is working its magic</h3>
+                            <p style={{ color: '#f3f4f6', fontWeight: '500', margin: 0, minHeight: '48px' }}>
+                                {messages[msgIndex]}
+                            </p>
+                            <div style={{ marginTop: '20px', width: '100%', height: '4px', background: '#e5e7eb', borderRadius: '2px', overflow: 'hidden' }}>
+                                <div style={{ width: '50%', height: '100%', background: '#3b82f6', animation: 'indeterminate 1.5s infinite linear', borderRadius: '2px' }} />
+                            </div>
+                        </div>
+                    )}
                 </div>
-
             </div>
+
+            {/* Group Submissions List */}
+            <div className="glass-card" style={{ marginTop: '30px' }}>
+                <h3 style={{ marginTop: 0, color: 'white', borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: '15px' }}>
+                    Group Submissions
+                </h3>
+
+                {groupPreferences.length === 0 ? (
+                    <p style={{ color: '#d1d5db', textAlign: 'center', padding: '20px 0' }}>
+                        No destinations submitted yet. Be the first!
+                    </p>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '20px' }}>
+                        {groupPreferences.map((pref, idx) => (
+                            <div key={idx} style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                padding: '16px 20px',
+                                background: 'rgba(255, 255, 255, 0.1)',
+                                borderRadius: '12px',
+                                border: '1px solid rgba(255, 255, 255, 0.15)'
+                            }}>
+                                <div style={{ color: 'white' }}>
+                                    <span style={{ fontWeight: '600', color: '#93c5fd' }}>{pref.userName || 'Member'}</span>
+                                    {' '}suggested{' '}
+                                    <span style={{ fontWeight: '600' }}>{pref.destinationName}</span>
+                                </div>
+                                <div style={{ fontSize: '14px', color: '#d1d5db', display: 'flex', gap: '16px' }}>
+                                    <span>{pref.fromDate} to {pref.toDate}</span>
+                                    <span style={{ background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '12px', fontSize: '12px', color: 'white' }}>
+                                        Priority: {pref.priorityScore}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <style>{`
+                @keyframes indeterminate {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(200%); }
+                }
+            `}</style>
         </div>
     );
 }

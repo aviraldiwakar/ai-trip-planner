@@ -44,7 +44,7 @@ export default function Login({ setUserId }) {
 
     return (
         <div style={{ maxWidth: '400px', margin: '100px auto', padding: '30px', border: '1px solid #e5e7eb', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', fontFamily: 'sans-serif' }}>
-            <h2 style={{ textAlign: 'center', marginBottom: '24px', color: '#111827' }}>
+            <h2 style={{ textAlign: 'center', marginBottom: '24px', color: '#f3f4f6' }}>
                 {isRegistering ? 'Create an Account' : 'Welcome Back'}
             </h2>
 
@@ -86,7 +86,7 @@ export default function Login({ setUserId }) {
                 </button>
             </form>
 
-            <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px', color: '#4B5563' }}>
+            <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px', color: '#f3f4f6' }}>
                 {isRegistering ? 'Already have an account? ' : "Don't have an account? "}
                 <span
                     onClick={() => { setIsRegistering(!isRegistering); setErrorMsg(''); }}

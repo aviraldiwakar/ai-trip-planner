@@ -71,16 +71,16 @@ export default function Dashboard({ userId }) {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px', marginBottom: '50px' }}>
 
                     <div className="glass-card" style={{ textAlign: 'center' }}>
-                        <h3 style={{ marginTop: 0, fontSize: '20px', color: '#1f2937' }}>Start a New Adventure</h3>
-                        <p style={{ color: '#4b5563', marginBottom: '24px', lineHeight: '1.5' }}>Create a fresh itinerary and invite your travel group to collaborate.</p>
+                        <h3 style={{ marginTop: 0, fontSize: '20px', color: '#f3f4f6' }}>Start a New Adventure</h3>
+                        <p style={{ color: '#f3f4f6', marginBottom: '24px', lineHeight: '1.5' }}>Create a fresh itinerary and invite your travel group to collaborate.</p>
                         <button onClick={handleCreateTrip} className="btn btn-success">
                             Create New Trip
                         </button>
                     </div>
 
                     <div className="glass-card" style={{ textAlign: 'center' }}>
-                        <h3 style={{ marginTop: 0, fontSize: '20px', color: '#1f2937' }}>Join Existing Trip</h3>
-                        <p style={{ color: '#4b5563', marginBottom: '24px', lineHeight: '1.5' }}>Enter a Group ID to sync up and add your travel preferences.</p>
+                        <h3 style={{ marginTop: 0, fontSize: '20px', color: '#f3f4f6' }}>Join Existing Trip</h3>
+                        <p style={{ color: '#f3f4f6', marginBottom: '24px', lineHeight: '1.5' }}>Enter a Group ID to sync up and add your travel preferences.</p>
                         <form onSubmit={handleJoinTrip} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             <input
                                 type="number"
@@ -99,7 +99,7 @@ export default function Dashboard({ userId }) {
 
                 {Array.isArray(myGroups) && myGroups.length > 0 && (
                     <div className="glass-card">
-                        <h3 style={{ marginTop: 0, borderBottom: '1px solid #e5e7eb', paddingBottom: '16px', color: '#1f2937' }}>Active Trips</h3>
+                        <h3 style={{ marginTop: 0, borderBottom: '1px solid #e5e7eb', paddingBottom: '16px', color: '#f3f4f6' }}>Active Trips</h3>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px', marginTop: '24px' }}>
                             {myGroups.map((group) => (
                                 <div

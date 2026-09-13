@@ -1,8 +1,10 @@
 package com.collaborative.planner.controller;
 
 import com.collaborative.planner.model.DestinationPreference;
+import com.collaborative.planner.model.User;
 import com.collaborative.planner.repository.DestinationPreferenceRepository;
 import com.collaborative.planner.repository.GroupMemberRepository;
+import com.collaborative.planner.repository.UserRepository;
 import com.collaborative.planner.service.TripGenerationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,7 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/preferences")
@@ -26,6 +31,9 @@ public class PreferenceController {
     // Inject the service that contains your AI generation logic
     @Autowired
     private TripGenerationService tripGenerationService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public static class PreferenceSubmitRequest {
         private Integer groupId;
@@ -46,6 +54,7 @@ public class PreferenceController {
         public void setToDate(LocalDate toDate) { this.toDate = toDate; }
         public Integer getPriorityScore() { return priorityScore; }
         public void setPriorityScore(Integer priorityScore) { this.priorityScore = priorityScore; }
+        public void setUserId(Integer userId) { this.userId = userId; }
     }
 
     @PostMapping("/submit")
@@ -94,5 +103,26 @@ public class PreferenceController {
                 "message", "Destination preference saved successfully",
                 "pref_id", saved.getPrefId()
         ));
+    }
+
+    @GetMapping("/group/{groupId}")
+    public ResponseEntity<List<Map<String, Object>>> getGroupPreferences(@PathVariable Integer groupId) {
+        List<Map<String, Object>> preferences = preferenceRepository.findByGroupId(groupId).stream().map(pref -> {
+            Map<String, Object> map = new HashMap<>();
+
+            // Fetch the user's name safely using the stored userId
+            String userName = userRepository.findById(pref.getUserId())
+                    .map(User::getName)
+                    .orElse("Unknown Member");
+
+            map.put("userName", userName);
+            map.put("destinationName", pref.getDestinationName());
+            map.put("fromDate", pref.getFromDate());
+            map.put("toDate", pref.getToDate());
+            map.put("priorityScore", pref.getPriorityScore());
+            return map;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(preferences);
     }
 }

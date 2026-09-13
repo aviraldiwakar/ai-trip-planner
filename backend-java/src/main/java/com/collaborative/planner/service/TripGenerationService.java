@@ -58,22 +58,27 @@ public class TripGenerationService {
         }
 
         // 2. Overlap Engine
-        LocalDate commonStartDate = LocalDate.MIN;
-        LocalDate commonEndDate = LocalDate.MAX;
+        LocalDate latestStart = LocalDate.MIN;
+        LocalDate earliestEnd = LocalDate.MAX;
+
+        LocalDate absoluteMinDate = LocalDate.MAX;
+        LocalDate absoluteMaxDate = LocalDate.MIN;
 
         for (DestinationPreference pref : preferences) {
-            if (pref.getFromDate().isAfter(commonStartDate)) {
-                commonStartDate = pref.getFromDate();
-            }
-            if (pref.getToDate().isBefore(commonEndDate)) {
-                commonEndDate = pref.getToDate();
-            }
+            // Track absolute outer bounds for AI fallback
+            if (pref.getFromDate().isBefore(absoluteMinDate)) absoluteMinDate = pref.getFromDate();
+            if (pref.getToDate().isAfter(absoluteMaxDate)) absoluteMaxDate = pref.getToDate();
+
+            // Track strict overlap
+            if (pref.getFromDate().isAfter(latestStart)) latestStart = pref.getFromDate();
+            if (pref.getToDate().isBefore(earliestEnd)) earliestEnd = pref.getToDate();
         }
 
-        boolean dateOverlapValid = !commonStartDate.isAfter(commonEndDate);
-        if (!dateOverlapValid) {
-            throw new IllegalStateException("Overlap Engine: Group preferences contain non-overlapping date ranges. No viable common schedule.");
-        }
+        boolean dateOverlapValid = !latestStart.isAfter(earliestEnd);
+
+        // If overlap fails, provide the total outer window to the AI instead of crashing
+        LocalDate finalStartDate = dateOverlapValid ? latestStart : absoluteMinDate;
+        LocalDate finalEndDate = dateOverlapValid ? earliestEnd : absoluteMaxDate;
 
         // 3. Priority Engine
         Map<String, Integer> scoreMap = new HashMap<>();
@@ -97,10 +102,9 @@ public class TripGenerationService {
         // 4. Call the AI Python Microservice using the calculated group data
         TripEnrichmentResponse aiResponse = aiIntegrationService.getTripEnrichment(
                 winningDestination,
-                commonStartDate.toString(),
-                commonEndDate.toString()
+                finalStartDate.toString(),
+                finalEndDate.toString()
         );
-
         // Convert the AI response to a JSON string to save in the DB
         ObjectMapper objectMapper = new ObjectMapper();
         String aiSuggestionsJson = objectMapper.writeValueAsString(aiResponse);
@@ -111,20 +115,20 @@ public class TripGenerationService {
         if (existing.isPresent()) {
             trip = existing.get();
             trip.setFinalDestination(winningDestination);
-            trip.setStartDate(commonStartDate);
-            trip.setEndDate(commonEndDate);
+            trip.setStartDate(finalStartDate); // Corrected variable
+            trip.setEndDate(finalEndDate);     // Corrected variable
             trip.setAiSuggestions(aiSuggestionsJson);
         } else {
-            trip = new GeneratedTrip(null, groupId, winningDestination, commonStartDate, commonEndDate, aiSuggestionsJson);
+            trip = new GeneratedTrip(null, groupId, winningDestination, finalStartDate, finalEndDate, aiSuggestionsJson); // Corrected variables
         }
 
         generatedTripRepository.save(trip);
 
         return new TripGenerationResult(
                 winningDestination,
-                commonStartDate,
-                commonEndDate,
-                true,
+                finalStartDate,    // Corrected variable
+                finalEndDate,      // Corrected variable
+                dateOverlapValid,  // Now correctly passes the overlap boolean instead of a hardcoded 'true'
                 preferences,
                 aiSuggestionsJson
         );

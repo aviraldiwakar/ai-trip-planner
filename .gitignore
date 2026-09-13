@@ -1,22 +1,28 @@
-node_modules/
-build/
-dist/
-coverage/
-.DS_Store
-*.log
-.env*
-!.env.example
-# IntelliJ IDE files
-.idea/
-*.iml
-out/
-
-# Maven build folders
-target/
-
-# Node modules (for your frontend)
-node_modules/
-dist/
-
-# Environment Variables
+# Environment variables & API keys
 .env
+*.env
+
+# Python artifacts
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Node / React artifacts
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Java / Maven artifacts
+backend-java/target/
+*.class
+*.jar
+*.war
+
+# IDE & OS files
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
