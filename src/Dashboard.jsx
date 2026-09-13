@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './index.css';
 
 export default function Dashboard({ userId }) {
     const [joinId, setJoinId] = useState('');
@@ -15,7 +16,6 @@ export default function Dashboard({ userId }) {
                 return res.json();
             })
             .then(data => {
-                // Ensure we only set the state if Java actually sent an Array
                 if (Array.isArray(data)) {
                     setMyGroups(data);
                 } else {
@@ -26,9 +26,7 @@ export default function Dashboard({ userId }) {
     }, [userId]);
 
     const handleCreateTrip = async () => {
-        // Generate a random 4-digit Group ID for the new trip
         const newGroupId = Math.floor(1000 + Math.random() * 9000);
-
         try {
             await fetch('http://localhost:8080/api/groups/join', {
                 method: 'POST',
@@ -39,11 +37,11 @@ export default function Dashboard({ userId }) {
         } catch (err) {
             alert("Server error creating trip.");
         }
-    }
+    };
+
     const handleJoinTrip = async (e) => {
         e.preventDefault();
         if (!joinId.trim()) return;
-
         const targetGroupId = parseInt(joinId.trim());
 
         try {
@@ -59,63 +57,75 @@ export default function Dashboard({ userId }) {
     };
 
     return (
-        <div style={{ maxWidth: '800px', margin: '50px auto', padding: '20px', fontFamily: 'sans-serif' }}>
-            <h2 style={{ textAlign: 'center', marginBottom: '40px', color: '#111827' }}>Trip Planner Dashboard</h2>
+        <>
+            <video autoPlay loop muted playsInline className="video-bg">
+                <source src="/background.mp4" type="video/mp4" />
+            </video>
+            <div className="video-overlay"></div>
 
-            <div style={{ display: 'flex', gap: '30px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <div className="dashboard-container" style={{ maxWidth: '900px', margin: '40px auto', padding: '0 20px' }}>
+                <h2 style={{ textAlign: 'center', marginBottom: '40px', fontSize: '32px', letterSpacing: '-1px', color: 'white' }}>
+                    Your Travel Hub
+                </h2>
 
-                {/* Create Trip Card */}
-                <div style={{ flex: '1 1 300px', padding: '30px', border: '1px solid #e5e7eb', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', textAlign: 'center' }}>
-                    <h3 style={{ marginTop: 0 }}>Start a New Adventure</h3>
-                    <p style={{ color: '#6b7280', marginBottom: '24px' }}>Create a fresh itinerary and invite your travel group.</p>
-                    <button
-                        onClick={handleCreateTrip}
-                        style={{ padding: '12px 24px', background: '#10B981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold', width: '100%' }}
-                    >
-                        Create New Trip
-                    </button>
-                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px', marginBottom: '50px' }}>
 
-                {/* Join Trip Card */}
-                <div style={{ flex: '1 1 300px', padding: '30px', border: '1px solid #e5e7eb', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', textAlign: 'center' }}>
-                    <h3 style={{ marginTop: 0 }}>Join Existing Trip</h3>
-                    <p style={{ color: '#6b7280', marginBottom: '24px' }}>Enter a Group ID to add your travel preferences.</p>
-                    <form onSubmit={handleJoinTrip} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <input
-                            type="number"
-                            placeholder="e.g. 1234"
-                            value={joinId}
-                            onChange={(e) => setJoinId(e.target.value)}
-                            style={{ padding: '12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '16px' }}
-                            required
-                        />
-                        <button
-                            type="submit"
-                            style={{ padding: '12px 24px', background: '#2563EB', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold', width: '100%' }}
-                        >
-                            Join Trip
+                    <div className="glass-card" style={{ textAlign: 'center' }}>
+                        <h3 style={{ marginTop: 0, fontSize: '20px', color: '#1f2937' }}>Start a New Adventure</h3>
+                        <p style={{ color: '#4b5563', marginBottom: '24px', lineHeight: '1.5' }}>Create a fresh itinerary and invite your travel group to collaborate.</p>
+                        <button onClick={handleCreateTrip} className="btn btn-success">
+                            Create New Trip
                         </button>
-                    </form>
-                </div>
-            </div>
+                    </div>
 
-            {/* New Active Trips Section */}
-            {Array.isArray(myGroups) && myGroups.length > 0 && (
-                <div>
-                    <h3 style={{ borderBottom: '2px solid #e5e7eb', paddingBottom: '10px' }}>Your Active Trips</h3>
-                    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', marginTop: '20px' }}>
-                        {myGroups.map((group) => (
-                            <div
-                                key={group.groupId}
-                                onClick={() => navigate(`/room/${group.groupId}`)}
-                                style={{ padding: '15px 20px', background: '#f3f4f6', borderRadius: '8px', cursor: 'pointer', border: '1px solid #d1d5db', flex: '1 1 200px', textAlign: 'center', fontWeight: 'bold', color: '#374151' }}
-                            >
-                                Trip Room #{group.groupId}
-                            </div>
-                        ))}
+                    <div className="glass-card" style={{ textAlign: 'center' }}>
+                        <h3 style={{ marginTop: 0, fontSize: '20px', color: '#1f2937' }}>Join Existing Trip</h3>
+                        <p style={{ color: '#4b5563', marginBottom: '24px', lineHeight: '1.5' }}>Enter a Group ID to sync up and add your travel preferences.</p>
+                        <form onSubmit={handleJoinTrip} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <input
+                                type="number"
+                                placeholder="e.g. 1234"
+                                value={joinId}
+                                onChange={(e) => setJoinId(e.target.value)}
+                                className="input-field"
+                                required
+                            />
+                            <button type="submit" className="btn btn-primary">
+                                Join Trip
+                            </button>
+                        </form>
                     </div>
                 </div>
-            )}
-        </div>
+
+                {Array.isArray(myGroups) && myGroups.length > 0 && (
+                    <div className="glass-card">
+                        <h3 style={{ marginTop: 0, borderBottom: '1px solid #e5e7eb', paddingBottom: '16px', color: '#1f2937' }}>Active Trips</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px', marginTop: '24px' }}>
+                            {myGroups.map((group) => (
+                                <div
+                                    key={group.groupId}
+                                    onClick={() => navigate(`/room/${group.groupId}`)}
+                                    style={{
+                                        padding: '20px',
+                                        background: '#f8fafc',
+                                        borderRadius: '12px',
+                                        cursor: 'pointer',
+                                        border: '1px solid #e2e8f0',
+                                        textAlign: 'center',
+                                        fontWeight: '600',
+                                        color: '#3b82f6',
+                                        transition: 'background 0.2s ease'
+                                    }}
+                                    onMouseOver={(e) => e.currentTarget.style.background = '#eff6ff'}
+                                    onMouseOut={(e) => e.currentTarget.style.background = '#f8fafc'}
+                                >
+                                    Trip Room #{group.groupId}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </>
     );
 }

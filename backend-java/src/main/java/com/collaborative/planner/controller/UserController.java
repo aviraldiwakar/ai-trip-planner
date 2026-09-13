@@ -39,4 +39,22 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid email or password."));
     }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getUserProfile(@PathVariable Integer userId) {
+        Optional<User> userOpt = userRepository.findById(userId);
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            // Return only safe data to the frontend
+            return ResponseEntity.ok(Map.of(
+                    "userId", user.getUserId(),
+                    "name", user.getName(),
+                    "email", user.getEmail()
+            ));
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
+    }
+
 }
