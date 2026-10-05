@@ -10,7 +10,7 @@ export default function Dashboard({ userId }) {
     useEffect(() => {
         if (!userId) return;
 
-        fetch(`http://localhost:8080/api/groups/user/${userId}`)
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/groups/user/${userId}`)
             .then(res => {
                 if (!res.ok) throw new Error("Network response was not OK");
                 return res.json();
@@ -28,7 +28,7 @@ export default function Dashboard({ userId }) {
     const handleCreateTrip = async () => {
         const newGroupId = Math.floor(1000 + Math.random() * 9000);
         try {
-            await fetch('http://localhost:8080/api/groups/join', {
+            await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/groups/join`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ groupId: newGroupId, userId: userId })
@@ -45,7 +45,7 @@ export default function Dashboard({ userId }) {
         const targetGroupId = parseInt(joinId.trim());
 
         try {
-            await fetch('http://localhost:8080/api/groups/join', {
+            await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/groups/join`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ groupId: targetGroupId, userId: userId })

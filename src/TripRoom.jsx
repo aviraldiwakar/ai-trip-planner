@@ -49,7 +49,7 @@ export default function TripRoom({ userId, setAppPhase }) {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/preferences/submit', {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/preferences/submit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -85,7 +85,7 @@ export default function TripRoom({ userId, setAppPhase }) {
 
         try {
             // 1. Send generation request to Spring Boot
-            const response = await fetch('http://localhost:8080/api/trips/generate', {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/trips/generate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ groupId: parseInt(groupId) })
@@ -135,7 +135,7 @@ export default function TripRoom({ userId, setAppPhase }) {
 
     const fetchGroupPreferences = async () => {
         try {
-            const response = await fetch(`http://localhost:8080/api/preferences/group/${groupId}`);
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/preferences/group/${groupId}`);
             if (response.ok) {
                 const data = await response.json();
                 setGroupPreferences(data);
