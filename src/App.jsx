@@ -97,6 +97,25 @@ export default function App() {
                     <Route path="/room/:groupId/itinerary" element={userId ? <TripResult /> : <Navigate to="/" />} />
                 </Routes>
             </div>
+
+            {/* Global Fixed Copyright Footer */}
+            <div style={{
+                position: 'fixed',
+                bottom: '16px',
+                right: '24px',
+                color: 'rgba(255, 255, 255, 0.6)',
+                fontSize: '12px',
+                fontWeight: '500',
+                letterSpacing: '0.5px',
+                zIndex: 9999, // Ensures it sits on top of all backgrounds and videos
+                userSelect: 'none', // Prevents highlighting/copying
+                WebkitUserSelect: 'none',
+                pointerEvents: 'none', // Prevents the text from blocking clicks on buttons behind it
+                textShadow: '0 1px 4px rgba(0, 0, 0, 0.8)' // Ensures readability on both light and dark backgrounds
+            }}>
+                &copy; 2026 Aviral Jain. All rights reserved.
+            </div>
+
         </BrowserRouter>
     );
 }

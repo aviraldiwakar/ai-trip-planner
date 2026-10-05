@@ -33,17 +33,24 @@ export default function Navbar({ userId, setUserId }) {
 
     return (
         <nav className="nav-container">
+            {/* Updated Logo with Signature */}
             <div
                 onClick={() => navigate('/dashboard')}
-                style={{ fontSize: '22px', fontWeight: '700', cursor: 'pointer', letterSpacing: '-0.5px' }}
+                style={{ display: 'flex', alignItems: 'baseline', gap: '6px', cursor: 'pointer' }}
             >
-                ✈️ TripPlanner
+                <span style={{ fontSize: '22px', fontWeight: '700', letterSpacing: '-0.5px' }}>
+                    ✈️ Trip Planner
+                </span>
+                <span style={{ fontSize: '13px', fontWeight: '500', color: 'rgba(255, 255, 255, 0.6)', fontStyle: 'italic' }}>
+                    by ADJ
+                </span>
             </div>
 
+            {/* Existing User Info & Logout */}
             <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-        <span style={{ fontSize: '15px', color: '#e5e7eb', fontWeight: '500' }}>
-          {userName ? `Welcome, ${userName}` : 'Loading...'}
-        </span>
+                <span style={{ fontSize: '15px', color: '#e5e7eb', fontWeight: '500' }}>
+                  {userName ? `Welcome, ${userName}` : 'Loading...'}
+                </span>
                 <button onClick={handleLogout} className="btn btn-danger">
                     Sign Out
                 </button>

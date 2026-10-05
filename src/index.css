@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap');
 
 body {
     font-family: 'Inter', sans-serif;
@@ -25,20 +26,21 @@ body {
 
 /* Cards */
 .glass-card {
-    background: rgba(255, 255, 255, 0); /* Lowered opacity for high transparency */
-    backdrop-filter: blur(3px); /* Increased blur to keep text legible */
-    -webkit-backdrop-filter: blur(13px);
-    border-radius: 16px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2); /* Deeper shadow for depth */
-    padding: 32px;
-    border: 1px solid rgba(255, 255, 255, 0.25); /* Subtle glowing edge */
+    background: rgba(255, 255, 255, 0.08); /* Drastically lowered opacity */
+    backdrop-filter: blur(28px) saturate(180%); /* Added saturation to make background colors pop */
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    padding: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.15); /* Ultra-thin translucent border */
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    color: #ffffff; /* Default text to white */
 }
 
 .glass-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 /* Buttons */
@@ -124,4 +126,32 @@ body {
 .dashboard-container {
     position: relative;
     z-index: 1;
+}
+
+/* Floating Sticker Animation */
+@keyframes driftSticker {
+    0% { transform: translateY(110vh) translateX(0) rotate(-15deg); opacity: 0; }
+    15% { opacity: 0.6; } /* Fade in */
+    85% { opacity: 0.6; } /* Fade out */
+    100% { transform: translateY(-20vh) translateX(50px) rotate(25deg); opacity: 0; }
+}
+
+.sticker {
+    position: fixed;
+    font-family: 'Caveat', cursive;
+    color: rgba(255, 255, 255, 0.7); /* Translucent white fill */
+    -webkit-text-stroke: 1px rgba(0, 0, 0, 0.7); /* Thin black border */
+    filter: drop-shadow(3px 4px 4px rgba(0, 0, 0, 0.6)); /* Black pop-out shadow */
+    pointer-events: none; /* Prevent them from blocking clicks */
+    white-space: nowrap;
+    animation: driftSticker linear infinite;
+    z-index: 1; /* Sits exactly between the background tint and the UI cards */
+}
+
+/* Force standard emojis to look like white outlines */
+.sticker-emoji {
+    font-family: sans-serif;
+    color: transparent;
+    text-shadow: 0 0 0 rgba(255, 255, 255, 0.7);
+    -webkit-text-stroke: 1px rgba(0, 0, 0, 0.7);
 }
