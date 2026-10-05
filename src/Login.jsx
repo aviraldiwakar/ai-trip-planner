@@ -19,7 +19,7 @@ export default function Login({ setUserId }) {
             : { email: email.trim(), passwordHash: password };
 
         try {
-            const response = await fetch(`http://localhost:8080${endpoint}`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
