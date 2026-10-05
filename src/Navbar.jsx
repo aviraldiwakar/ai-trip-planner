@@ -12,7 +12,7 @@ export default function Navbar({ userId, setUserId }) {
             setUserName('');
             return;
         }
-        fetch(`http://localhost:8080/api/users/${userId}`)
+        fetch('${import.meta.env.VITE_BACKEND_URL}/api/users/register')
             .then(res => {
                 if (!res.ok) throw new Error("Failed to fetch user");
                 return res.json();
