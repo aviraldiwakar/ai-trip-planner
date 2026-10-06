@@ -194,7 +194,17 @@ export default function TripRoom({ userId, setAppPhase }) {
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         <div>
                             <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', color: '#f3f4f6' }}>Destination Name</label>
-                            <input type="text" value={destination} onChange={(e) => setDestination(e.target.value)} required className="input-field" disabled={isGenerating} />
+                            <input
+                                type="text"
+                                value={destination}
+                                onChange={(e) => setDestination(e.target.value)}
+                                required
+                                className="input-field"
+                                disabled={isGenerating}
+                            />
+                            <p style={{ margin: '6px 0 0 0', fontSize: '12px', color: '#fbbf24', fontStyle: 'italic' }}>
+                                ⚠️ Please type the exact city or location name to prevent AI generation errors.
+                            </p>
                         </div>
                         <div style={{ display: 'flex', gap: '10px' }}>
                             <div style={{ flex: 1 }}>
