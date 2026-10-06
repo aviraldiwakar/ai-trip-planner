@@ -4,6 +4,8 @@ import com.collaborative.planner.dto.TripEnrichmentRequest;
 import com.collaborative.planner.dto.TripEnrichmentResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.util.retry.Retry;
+import java.time.Duration;
 
 @Service
 public class AiIntegrationService {
@@ -22,6 +24,8 @@ public class AiIntegrationService {
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(TripEnrichmentResponse.class)
-                .block(); // Blocks synchronously to fit standard Spring MVC flow
+                // Instructs Java to retry up to 6 times, waiting 10 seconds between each attempt
+                .retryWhen(Retry.fixedDelay(10, Duration.ofSeconds(10)))
+                .block();
     }
 }
