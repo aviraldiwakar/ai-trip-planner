@@ -1,5 +1,6 @@
 package com.collaborative.planner.controller;
 
+import com.collaborative.planner.model.GeneratedTrip;
 import com.collaborative.planner.service.TripGenerationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,10 @@ import com.collaborative.planner.dto.TripEnrichmentResponse;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import java.util.Optional;
+import com.collaborative.planner.repository.GeneratedTripRepository;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +31,9 @@ public class TripController {
 
     @Autowired
     private AiIntegrationService aiIntegrationService;
+
+    @Autowired
+    private GeneratedTripRepository generatedTripRepository;
 
     @PostMapping("/generate")
     public ResponseEntity<?> generateCollaborativeTrip(@RequestBody Map<String, Integer> requestBody) {
@@ -79,5 +87,15 @@ public class TripController {
         // Calls the Python server via RestTemplate
         TripEnrichmentResponse response = aiIntegrationService.getTripEnrichment(place, startDate, endDate);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{groupId}")
+    public ResponseEntity<?> getTripByGroupId(@PathVariable Integer groupId) {
+        Optional<GeneratedTrip> trip = generatedTripRepository.findByGroupId(groupId);
+        if (trip.isPresent()) {
+            return ResponseEntity.ok(trip.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

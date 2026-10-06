@@ -5,6 +5,7 @@ import Dashboard from './Dashboard';
 import TripRoom from './TripRoom';
 import Navbar from './Navbar';
 import TripResult from './TripResult';
+import Invite from './Invite';
 
 // The new bottom-right overlay component
 const LoadingOverlay = () => {
@@ -104,6 +105,7 @@ export default function App() {
                     <Route path="/dashboard" element={userId ? <Dashboard userId={userId} /> : <Navigate to="/" />} />
                     <Route path="/room/:groupId" element={userId ? <TripRoom userId={userId} setAppPhase={setAppPhase} /> : <Navigate to="/" />} />
                     <Route path="/room/:groupId/itinerary" element={userId ? <TripResult /> : <Navigate to="/" />} />
+                    <Route path="/invite/:groupId" element={<Invite userId={userId} />} />
                 </Routes>
             </div>
 

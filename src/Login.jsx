@@ -37,7 +37,15 @@ export default function Login({ setUserId }) {
 
             setUserId(data.userId);
             localStorage.setItem('tripPlannerUserId', data.userId);
-            navigate('/dashboard');
+
+            // Check if they were trying to join a group before logging in
+            const pendingInvite = localStorage.getItem('pendingInvite');
+            if (pendingInvite) {
+                localStorage.removeItem('pendingInvite');
+                navigate(`/invite/${pendingInvite}`);
+            } else {
+                navigate('/dashboard');
+            }
 
         } catch (err) {
             setErrorMsg('Failed to connect to the server.');
