@@ -14,7 +14,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/groups")
-@CrossOrigin(origins = {"https://ai-trip-planner-src.vercel.app", "http://localhost:5173"})
+@CrossOrigin(origins = {"https://ai-trip-planner-src.vercel.app",
+                        "https://ai-trip-planner-oao0wfz5g-adj8.vercel.app",
+                        "http://localhost:5173"})
 public class GroupController {
 
     @Autowired

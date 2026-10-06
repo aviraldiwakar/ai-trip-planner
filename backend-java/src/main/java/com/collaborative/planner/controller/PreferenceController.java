@@ -22,7 +22,9 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/preferences")
-@CrossOrigin(origins = {"https://ai-trip-planner-src.vercel.app", "http://localhost:5173"})
+@CrossOrigin(origins = {"https://ai-trip-planner-src.vercel.app",
+                        "https://ai-trip-planner-oao0wfz5g-adj8.vercel.app",
+                        "http://localhost:5173"})
 public class PreferenceController {
 
     @Autowired
