@@ -164,6 +164,13 @@ export default function TripRoom({ userId, setAppPhase }) {
         }
     };
 
+    const handleCopyInvite = () => {
+        const inviteLink = `${window.location.origin}/invite/${groupId}`;
+        navigator.clipboard.writeText(inviteLink);
+        setStatusMessage('✅ Invite link copied to clipboard!');
+        setTimeout(() => setStatusMessage(''), 3000);
+    };
+
     useEffect(() => {
         // Silently ping the Python service to trigger Render's boot sequence
         // the exact moment the user enters the room.
@@ -182,6 +189,18 @@ export default function TripRoom({ userId, setAppPhase }) {
             <h2 style={{ textAlign: 'center', color: 'white', fontSize: '32px', letterSpacing: '-1px' }}>
                 Trip Room #{groupId}
             </h2>
+
+            {/* NEW: Invite Link Button */}
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <button
+                    onClick={handleCopyInvite}
+                    className="btn"
+                    style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#93c5fd', border: '1px solid #3b82f6' }}
+                >
+                    🔗 Copy Group Invite Link
+                </button>
+            </div>
+
             <p style={{ textAlign: 'center', color: '#e5e7eb', marginBottom: '40px' }}>
                 Submit your travel preferences below.
             </p>
