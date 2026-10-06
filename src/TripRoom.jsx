@@ -17,11 +17,13 @@ export default function TripRoom({ userId, setAppPhase }) {
     const [msgIndex, setMsgIndex] = useState(0);
 
     const messages = [
+        "Booting up AI microservices (this may take up to 60s)...",
         "Syncing group travel dates...",
         "Analyzing destination preferences...",
         "Cross-referencing global flight paths...",
         "Crafting your customized itinerary...",
-        "Packing the virtual bags..."
+        "Packing the virtual bags...",
+        "Booting up AI microservices (this may take up to 60s)..."
     ];
 
     useEffect(() => {
@@ -79,23 +81,40 @@ export default function TripRoom({ userId, setAppPhase }) {
     };
 
     // The finalized live integration function
+    // The automatic retry wrapper to handle Render free-tier cold starts
+    const fetchWithRetry = async (url, options, retries = 6) => {
+        for (let i = 0; i < retries; i++) {
+            const response = await fetch(url, options);
+            if (response.ok) return response;
+
+            // If it's a Gateway or Timeout error, the Python container is still waking up
+            if (response.status === 502 || response.status === 504) {
+                console.log(`Waiting for AI microservice to boot... (Attempt ${i + 1}/${retries})`);
+                await new Promise(res => setTimeout(res, 5000)); // Wait 5 seconds
+                continue;
+            }
+
+            // If it's a real error (like 400 Bad Request), throw immediately
+            const errData = await response.json();
+            throw new Error(errData.message || "Failed to generate trip");
+        }
+        throw new Error("AI engine took too long to wake up. Please click finalize again.");
+    };
+
+    // The finalized live integration function
     const handleFinalizeTrip = async () => {
         setIsGenerating(true);
         setAppPhase('generating');
 
         try {
-            // 1. Send generation request to Spring Boot
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/trips/generate`, {
+            // 1. Send generation request using the new retry wrapper
+            const response = await fetchWithRetry(`${import.meta.env.VITE_BACKEND_URL}/api/trips/generate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ groupId: parseInt(groupId) })
             });
 
             const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || "Failed to generate trip");
-            }
 
             // 2. Parse the JSON string received from Python via Java
             const aiData = typeof data.aiSuggestions === 'string'
