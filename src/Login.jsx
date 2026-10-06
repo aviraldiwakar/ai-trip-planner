@@ -7,11 +7,13 @@ export default function Login({ setUserId }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrorMsg('');
+        setIsLoading(true); // Disable button immediately
 
         const endpoint = isRegistering ? '/api/users/register' : '/api/users/login';
         const payload = isRegistering
@@ -29,16 +31,17 @@ export default function Login({ setUserId }) {
 
             if (!response.ok) {
                 setErrorMsg(data.message || 'Authentication failed.');
+                setIsLoading(false); // Re-enable if error
                 return;
             }
 
-            // Save user to React state and browser storage
             setUserId(data.userId);
             localStorage.setItem('tripPlannerUserId', data.userId);
             navigate('/dashboard');
 
         } catch (err) {
             setErrorMsg('Failed to connect to the server.');
+            setIsLoading(false); // Re-enable if network crash
         }
     };
 
@@ -80,9 +83,20 @@ export default function Login({ setUserId }) {
 
                 <button
                     type="submit"
-                    style={{ padding: '12px', background: '#2563EB', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold', marginTop: '8px' }}
+                    disabled={isLoading}
+                    style={{
+                        padding: '12px',
+                        background: isLoading ? '#9ca3af' : '#2563EB', // Grey out when loading
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: isLoading ? 'not-allowed' : 'pointer',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        marginTop: '8px'
+                    }}
                 >
-                    {isRegistering ? 'Sign Up' : 'Sign In'}
+                    {isLoading ? 'Waking up server (takes ~50s)...' : (isRegistering ? 'Sign Up' : 'Sign In')}
                 </button>
             </form>
 

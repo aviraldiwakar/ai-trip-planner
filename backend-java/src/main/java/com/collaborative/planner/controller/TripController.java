@@ -8,13 +8,15 @@ import org.springframework.web.bind.annotation.*;
 import com.collaborative.planner.service.AiIntegrationService;
 import com.collaborative.planner.dto.TripEnrichmentResponse;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/trips")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = {"https://ai-trip-planner-src.vercel.app", "http://localhost:5173"})
 public class TripController {
 
     @Autowired
@@ -58,7 +60,7 @@ public class TripController {
                     "message", e.getMessage()
             ));
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
                     "status", "GENERATION_FAILED",
                     "message", "An unexpected error occurred: " + e.getMessage()
