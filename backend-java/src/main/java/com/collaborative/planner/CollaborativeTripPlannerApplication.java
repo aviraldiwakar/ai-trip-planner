@@ -14,6 +14,6 @@ public class CollaborativeTripPlannerApplication {
 
     @Bean
     public WebClient webClient(WebClient.Builder builder) {
-        return builder.baseUrl("http://localhost:8000").build();
+        return builder.baseUrl("https://ai-trip-planner-w56g.onrender.com").build();
     }
 }
