@@ -109,8 +109,9 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    object-fit: cover;
-    z-index: -2;
+    object-fit: cover; /* Forces the video/poster to fill the screen without squishing */
+    z-index: -1;
+    background-color: #0f172a; /* Provide a dark slate fallback color just in case */
 }
 
 .video-overlay {

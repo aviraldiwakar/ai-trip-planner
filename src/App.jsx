@@ -66,58 +66,34 @@ export default function App() {
 
     return (
         <BrowserRouter>
+            {/* 1. Play ONLY intro video on initial load */}
             {appPhase === 'initial-load' && (
-                <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    poster="/intro-poster.png"
-                    className="video-bg"
-                >
-                    {/* The browser tries the much smaller WebM file first */}
+                <video autoPlay loop muted playsInline poster="/intro-poster.png" className="video-bg">
                     <source src="/intro.webm" type="video/webm" />
-
-                    {/* Fallback for browsers that do not support WebM */}
                     <source src="/intro.mp4" type="video/mp4" />
                 </video>
             )}
 
-            <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                poster="/main-poster.png"
-                className="video-bg"
-            >
-                {/* The browser tries the much smaller WebM file first */}
-                <source src="/main-bg.webm" type="video/webm" />
+            {/* 2. Play ONLY main background when ready and navigating the app */}
+            {appPhase === 'ready' && (
+                <video autoPlay loop muted playsInline poster="/main-poster.png" className="video-bg">
+                    <source src="/main-bg.webm" type="video/webm" />
+                    <source src="/main-bg.mp4" type="video/mp4" />
+                </video>
+            )}
 
-                {/* Fallback for browsers that do not support WebM */}
-                <source src="/main-bg.mp4" type="video/mp4" />
-            </video>
-
-            {/* Render video AND text overlay endlessly until AI finishes */}
+            {/* 3. Play ONLY generating video + text overlay when AI is thinking */}
             {appPhase === 'generating' && (
                 <>
-                    <video
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        poster="/generating-poster.png"
-                        className="video-bg"
-                    >
-                        {/* The browser tries the much smaller WebM file first */}
+                    <video autoPlay loop muted playsInline poster="/generating-poster.png" className="video-bg">
                         <source src="/generating.webm" type="video/webm" />
-
-                        {/* Fallback for browsers that do not support WebM */}
                         <source src="/generating.mp4" type="video/mp4" />
                     </video>
                     <LoadingOverlay />
                 </>
             )}
+
+            <div className="video-overlay" style={{ zIndex: -1 }}></div>
 
             <div className="video-overlay" style={{ zIndex: -1 }}></div>
 

@@ -58,22 +58,6 @@ export default function Dashboard({ userId }) {
 
     return (
         <>
-            <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                poster="/main-poster.png"
-                className="video-bg"
-            >
-                {/* The browser tries the much smaller WebM file first */}
-                <source src="/main-bg.webm" type="video/webm" />
-
-                {/* Fallback for browsers that do not support WebM */}
-                <source src="/main-bg.mp4" type="video/mp4" />
-            </video>
-            <div className="video-overlay"></div>
-
             <div className="dashboard-container" style={{ maxWidth: '900px', margin: '40px auto', padding: '0 20px' }}>
                 <h2 style={{ textAlign: 'center', marginBottom: '40px', fontSize: '32px', letterSpacing: '-1px', color: 'white' }}>
                     Your Travel Hub
