@@ -19,9 +19,9 @@ class TripEnrichmentSchema(BaseModel):
     alternativeSuggestions: List[AlternativeSuggestion]
 
 class TripRequest(BaseModel):
-    winning_place: str
-    start_date: str
-    end_date: str
+    place: str
+    startDate: str
+    endDate: str
 
 app = FastAPI()
 client = Groq()
@@ -30,10 +30,10 @@ client = Groq()
 async def enrich_trip(request: TripRequest):
     try:
         prompt = f"""
-        A travel group is planning a trip to {request.winning_place}.
-        Their travel dates are from {request.start_date} to {request.end_date}.
+        A travel group is planning a trip to {request.place}.
+        Their travel dates are from {request.startDate} to {request.endDate}.
         
-        Determine the absolute best months to visit {request.winning_place}. 
+        Determine the absolute best months to visit {request.place}. 
         
         CRITICAL RULE: Check if the travel dates fall within your chosen best months. 
         - If they DO NOT, you MUST set "datesAligned" to false, explain the suboptimal weather in "seasonalAdvice", and provide 1-2 "alternativeSuggestions" with peak weather for those exact dates.
@@ -52,7 +52,7 @@ async def enrich_trip(request: TripRequest):
         """
 
         response = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
+            model="llama3-8b-8192", # Using a standard Groq-supported model
             messages=[
                 {"role": "system", "content": "You are a travel API that outputs strict JSON."},
                 {"role": "user", "content": prompt}
@@ -60,7 +60,6 @@ async def enrich_trip(request: TripRequest):
             response_format={"type": "json_object"}
         )
 
-        # Parse the raw JSON string returned by Groq
         return json.loads(response.choices[0].message.content)
 
     except Exception as e:
@@ -68,7 +67,14 @@ async def enrich_trip(request: TripRequest):
         return {
             "mustVisitPlaces": ["Top Rated Restaurant", "City Plaza", "Viewpoint"],
             "bestMonths": ["Year-round"],
-            "datesAligned": True, # Set back to True to hide the warning UI
+            "datesAligned": True,
             "seasonalAdvice": "",
-            "alternativeSuggestions": [] # Empty array prevents the cards from rendering
+            "alternativeSuggestions": []
         }
+
+# Added the Uvicorn engine to bind to Render's 0.0.0.0 host and dynamic port
+if __name__ == "__main__":
+    import uvicorn
+    import os
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
