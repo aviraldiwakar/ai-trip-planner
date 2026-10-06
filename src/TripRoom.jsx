@@ -165,6 +165,15 @@ export default function TripRoom({ userId, setAppPhase }) {
     };
 
     useEffect(() => {
+        // Silently ping the Python service to trigger Render's boot sequence
+        // the exact moment the user enters the room.
+        // 'no-cors' prevents browser console errors since we don't need to read the response.
+        fetch('https://ai-trip-planner-w56g.onrender.com/docs', { mode: 'no-cors' })
+            .then(() => console.log("Python AI service pre-warmed."))
+            .catch(() => console.log("Sent wake-up ping to Python AI..."));
+    }, []);
+
+    useEffect(() => {
         fetchGroupPreferences();
     }, [groupId]);
 
