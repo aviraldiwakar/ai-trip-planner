@@ -58,8 +58,19 @@ export default function Dashboard({ userId }) {
 
     return (
         <>
-            <video autoPlay loop muted playsInline className="video-bg">
-                <source src="/background.mp4" type="video/mp4" />
+            <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                poster="/main-poster.png"
+                className="video-bg"
+            >
+                {/* The browser tries the much smaller WebM file first */}
+                <source src="/main-bg.webm" type="video/webm" />
+
+                {/* Fallback for browsers that do not support WebM */}
+                <source src="/main-bg.mp4" type="video/mp4" />
             </video>
             <div className="video-overlay"></div>
 
