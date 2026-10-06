@@ -19,9 +19,9 @@ class TripEnrichmentSchema(BaseModel):
     alternativeSuggestions: List[AlternativeSuggestion]
 
 class TripRequest(BaseModel):
-    place: str
-    startDate: str
-    endDate: str
+    winning_place: str
+    start_date: str
+    end_date: str
 
 app = FastAPI()
 client = Groq()
@@ -30,10 +30,10 @@ client = Groq()
 async def enrich_trip(request: TripRequest):
     try:
         prompt = f"""
-        A travel group is planning a trip to {request.place}.
-        Their travel dates are from {request.startDate} to {request.endDate}.
+        A travel group is planning a trip to {request.winning_place}.
+        Their travel dates are from {request.start_date} to {request.end_date}.
         
-        Determine the absolute best months to visit {request.place}. 
+        Determine the absolute best months to visit {request.winning_place}. 
         
         CRITICAL RULE: Check if the travel dates fall within your chosen best months. 
         - If they DO NOT, you MUST set "datesAligned" to false, explain the suboptimal weather in "seasonalAdvice", and provide 1-2 "alternativeSuggestions" with peak weather for those exact dates.
